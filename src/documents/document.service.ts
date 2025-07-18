@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -11,25 +11,32 @@ export class DocumentService {
     private readonly repo: Repository<Document>,
   ) {}
 
-  create(document: Partial<Document>) {
+  async create(document: Partial<Document>) {
     const doc = this.repo.create(document);
-    return this.repo.save(doc);
+    return await this.repo.save(doc);
   }
 
-  findAll() {
-    return this.repo.find();
+  async findAll() {
+    return await this.repo.find();
   }
 
-  findById(id: number) {
-    return this.repo.findOne({ where: { id } });
+  async findById(id: number) {
+    return await this.repo.findOne({ where: { id } });
   }
 
   async update(id: number, data: Partial<Document>) {
-    await this.repo.update(id, data);
+    const result = await this.repo.update(id, data);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Document with id ${id} not found`);
+    }
     return this.findById(id);
   }
 
-  delete(id: number) {
-    return this.repo.delete(id);
+  async delete(id: number) {
+    const result = await this.repo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Document with id ${id} not found`);
+    }
+    return result;
   }
 }

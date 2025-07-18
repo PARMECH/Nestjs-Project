@@ -1,5 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
+export enum DocumentStatus {
+  Pending = 'pending',
+  Processing = 'processing',
+  Complete = 'complete',
+  Failed = 'failed',
+}
+
 @Entity()
 export class Document {
   @PrimaryGeneratedColumn()
@@ -11,9 +18,9 @@ export class Document {
   @Column()
   uploaderId: number;
 
-  @Column({ default: 'pending' })
-  status: 'pending' | 'processing' | 'complete' | 'failed';
+  @Column({ type: 'enum', enum: DocumentStatus, default: DocumentStatus.Pending })
+  status: DocumentStatus;
 
   @Column({ nullable: true })
-  errorMessage: string;
+  errorMessage?: string;
 }
